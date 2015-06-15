@@ -26,6 +26,7 @@ class Email(object):
              subject = 'no subject',    # email subject
              content = '',              # email content, encoding must be utf8
              content_subtype = 'plain', # content type [plain, html]
+             embed_images = [], 		# embeded images [{id:'image-id', path:'/p/to/i.png'}, ..]
              attachment = []):          # attachment file list
         """ Send mail function"""
         # process mail message meta
@@ -51,7 +52,12 @@ class Email(object):
         message['Subject'] = subject
         message['Date'] = formatdate(localtime=True)
         if content:
-            message.attach(MIMEText(content.encode('utf-8'), content_subtype, 'utf-8'))
+            message.attach(MIMEText(content.encode('utf-8'), content_subtype, 'utf-8')) 
+        for embed_image in embed_images: 
+            with file(embed_image['path'], 'rb') as image_file: 
+                mime_image = MIMEImage(image_file.read()) 
+                mime_image.add_header('Content-ID', embed_image['id']) 
+                message.attach(mime_image)
 
         # process attachment
         if attachment:
